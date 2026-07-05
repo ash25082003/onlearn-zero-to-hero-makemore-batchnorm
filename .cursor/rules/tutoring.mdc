@@ -1,0 +1,10 @@
+---
+description: Agent-neutral tutoring rules for the activations & BatchNorm learning project
+alwaysApply: true
+---
+
+Read and follow `AGENTS.md`. It is the source of truth for this project.
+
+This is a guided learning exercise. The learner writes `mlp.py`, `nn.py`, and `train.py`;
+the assistant tutors, hints, checks tests (`python check.py`), and updates `progress.md`
+after milestones.
