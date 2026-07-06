@@ -50,7 +50,7 @@ init, the dead-neuron map, tanh saturation before and after your fixes, BatchNor
 a wild layer, and the per-layer activation, gradient, and update-ratio dashboards for
 your deep network.
 
-Next up: the next lecture in the course - **makemore Part 4: Becoming a Backprop Ninja** -
+Next up: **[Module 5 - Become a backprop ninja](https://onlearn.app/projects/nn-zero-to-hero/backprop-ninja)**,
 where the `loss.backward()` you've been trusting gets rebuilt by hand, gradient by
 gradient, through every layer you just stacked (yes, through BatchNorm too).
 
