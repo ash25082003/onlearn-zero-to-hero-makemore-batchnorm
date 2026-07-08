@@ -52,11 +52,12 @@ is one of the most-Googled PyTorch bugs. The single-example test in this milesto
 bug, bottled.
 
 ## Milestone 6 — Build your own torch.nn
-Package the whole toolkit into three classes with the real `torch.nn` API — `Linear`
-(kaiming baked in), `BatchNorm1d` (two personalities: batch stats when training, running
-buffers when not), `Tanh` — then `build_network`: six Linears deep, BatchNorm after every
-one, no biases (BatchNorm eats them), and the last gamma scaled by 0.1 (Milestone 1's
-lesson, BatchNorm edition). 47,024 parameters.
+Package the whole toolkit into three classes with the real `torch.nn` API, built in this
+order: `Linear` (kaiming baked in), `Tanh`, then `BatchNorm1d` (two personalities: batch
+stats when training, running buffers when not). Only then `build_network` — it composes
+all three: six Linears deep, BatchNorm after every one, no biases (BatchNorm eats them),
+and the last gamma scaled by 0.1 (Milestone 1's lesson, BatchNorm edition) — and
+`forward_net` to run it. 47,024 parameters.
 *Concept:* a module is parameters + forward + state. After this, `nn.Linear` and
 `nn.BatchNorm1d` are never black boxes again. (One honest detail: the class tracks running
 *variance* with an eps, not std — that's what the real BatchNorm1d stores.)

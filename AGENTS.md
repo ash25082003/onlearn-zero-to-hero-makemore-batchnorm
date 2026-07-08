@@ -111,7 +111,11 @@ The rules:
   and why forgetting `.eval()` is one of the most-Googled PyTorch bugs. The single-example
   test in the suite *is* that bug, bottled.
 - **Milestone 6:** the classes mirror `torch.nn`'s real API on purpose — after this
-  milestone, `nn.Linear` and `nn.BatchNorm1d` are never black boxes again. One honest
+  milestone, `nn.Linear` and `nn.BatchNorm1d` are never black boxes again. Guide the
+  build in the order the checks run: `Linear` (`__init__`, `__call__`, `parameters`),
+  then `Tanh`, then `BatchNorm1d`, and only then `build_network` and `forward_net` —
+  `build_network` composes all three classes, so steer them away from it until the
+  classes pass. One honest
   detail to flag: the flat version tracked the running *std*; the class tracks the running
   *variance* (plus an eps inside the sqrt), because that's what the real `BatchNorm1d`
   stores. Same idea, different bookkeeping.

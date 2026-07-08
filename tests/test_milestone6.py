@@ -217,5 +217,41 @@ class TestForwardNet(unittest.TestCase):
                          "the network ends in logits: one score per character")
 
 
+# The teaching order for this milestone. unittest's default is alphabetical,
+# which would run TestBuildNetwork before TestLinear ever gets a turn — so a
+# learner who finished BatchNorm1d first would be pointed at build_network,
+# a function that can't work until Linear and Tanh exist. Build the small
+# pieces first, then the things that compose them.
+_TEACHING_ORDER = [
+    (TestLinear, ["test_init_scale_is_kaiming",
+                  "test_matmul_with_known_weights",
+                  "test_parameters_with_and_without_bias"]),
+    (TestTanh, ["test_tanh"]),
+    (TestBatchNorm1d, ["test_training_mode_normalizes",
+                       "test_running_buffers_update",
+                       "test_eval_mode_uses_running_stats",
+                       "test_eval_mode_does_not_touch_buffers",
+                       "test_parameters_are_gamma_and_beta"]),
+    (TestBuildNetwork, ["test_parameter_count",
+                        "test_parameter_count_tracks_arguments",
+                        "test_initial_loss_is_calibrated",
+                        "test_all_parameters_require_grad",
+                        "test_reproducible_with_seed"]),
+    (TestForwardNet, ["test_embedding_and_flatten",
+                      "test_layers_applied_in_order",
+                      "test_output_shape"]),
+]
+
+
+def load_tests(loader, standard_tests, pattern):
+    suite = unittest.TestSuite()
+    for case, first in _TEACHING_ORDER:
+        discovered = loader.getTestCaseNames(case)
+        ordered = ([n for n in first if n in discovered]
+                   + [n for n in discovered if n not in first])
+        suite.addTests(case(name) for name in ordered)
+    return suite
+
+
 if __name__ == "__main__":
     unittest.main()

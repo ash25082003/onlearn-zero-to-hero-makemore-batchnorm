@@ -59,11 +59,13 @@ MILESTONES = [
      "batchnorm_infer: same center-scale-shift, but with the running stats "
      "you're handed - never .mean(0)/.std(0) on x, so a batch of one works."),
     (6, "Build your own torch.nn", "tests.test_milestone6",
-     "Every class: do the work in __call__, keep it in self.out, list "
-     "trainables in parameters(). Linear: randn / fan_in**0.5, zero bias. "
+     "Build in order - Linear first: __init__ (weight randn / fan_in**0.5, "
+     "zero bias), __call__ (x @ weight + bias, kept in self.out), then "
+     "parameters(). Then Tanh (same pattern, nothing to train). Then finish "
      "BatchNorm1d: batch stats when training, running buffers when not. "
-     "build_network: [Linear, BatchNorm1d, Tanh] x5 then Linear + "
-     "BatchNorm1d, no biases, last gamma * 0.1."),
+     "Only once the classes pass, build_network: [Linear, BatchNorm1d, "
+     "Tanh] x5 then Linear + BatchNorm1d, no biases, last gamma * 0.1 - "
+     "and forward_net to run it."),
     (7, "Training telemetry", "tests.test_milestone7",
      "activation_stats: one dict per Tanh from layer.out. update_ratios: "
      "log10((lr * p.grad).std() / p.data.std()) for 2D params, in no_grad. "
@@ -75,6 +77,24 @@ MILESTONES = [
 GLYPH = {"done": "✅", "current": "▶ ", "locked": "\U0001f512"}  # ✅ ▶ 🔒
 
 
+class _OrderedResult(unittest.TestResult):
+    """Records failures and errors in the order the tests ran, so the
+    scoreboard always points at the earliest unfinished step - not at
+    whichever kind of problem unittest happens to list first."""
+
+    def __init__(self):
+        super().__init__()
+        self.problems = []
+
+    def addFailure(self, test, err):
+        super().addFailure(test, err)
+        self.problems.append((test, self._exc_info_to_string(err, test)))
+
+    def addError(self, test, err):
+        super().addError(test, err)
+        self.problems.append((test, self._exc_info_to_string(err, test)))
+
+
 def run_module(module_name):
     """Run one milestone's tests. Returns (passed, total, first_problem_detail)."""
     loader = unittest.TestLoader()
@@ -82,15 +102,16 @@ def run_module(module_name):
         suite = loader.loadTestsFromName(module_name)
     except Exception as exc:  # tests couldn't even import (e.g. broken mlp.py)
         return 0, 1, f"could not load tests ({exc})"
-    result = unittest.TestResult()
+    result = _OrderedResult()
     suite.run(result)
     total = result.testsRun
-    problems = result.failures + result.errors
-    passed = total - len(problems)
+    passed = total - len(result.problems)
     detail = None
-    if problems:
-        lines = problems[0][1].strip().splitlines()
-        detail = lines[-1] if lines else "a check failed"
+    if result.problems:
+        test, traceback = result.problems[0]
+        lines = traceback.strip().splitlines()
+        last = lines[-1] if lines else "a check failed"
+        detail = f"{test.id().split('.')[-1]} - {last}"
     return passed, total, detail
 
 
