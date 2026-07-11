@@ -14,8 +14,11 @@ thin adapters that point back to the same guide.
    pip install torch
    ```
 
-   Prefer a virtual environment? `python -m venv .venv && source .venv/bin/activate`
-   first, then `pip install torch`. On Windows, activate with `.venv\Scripts\activate`.
+   Prefer a virtual environment? Make ONE for the whole course and reuse it in every
+   module - all modules run on the same few packages:
+   `python -m venv ~/zero-to-hero-env && source ~/zero-to-hero-env/bin/activate`,
+   then `pip install torch regex` (once - covers every module). On Windows, activate
+   with `%USERPROFILE%\zero-to-hero-env\Scripts\activate`.
 
 4. Confirm it worked - this also shows your progress scoreboard:
 
